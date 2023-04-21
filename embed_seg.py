@@ -1,12 +1,12 @@
-
 import torch.nn as nn
 import torch.nn.functional as F
 
-from erfnet import Encoder, Decoder
+from erfnet.erfnet import Encoder, Decoder
 
 
 class EmbedSegModel(nn.Module):
     def __init__(self, num_classses: int, sigma_2d: bool=True):
+        super().__init__()
         self.encoder = Encoder()
 
         self.seed_branch = Decoder(num_classses)

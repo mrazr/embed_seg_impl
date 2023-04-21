@@ -9,7 +9,7 @@ class DownsampleBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
 
-        self.conv = nn.Conv2d(in_channels, out_channels, 3, 2, padding=1)
+        self.conv = nn.Conv2d(in_channels, out_channels - in_channels, 3, 2, padding=1)
     
     def forward(self, x):
         conv = self.conv(x)

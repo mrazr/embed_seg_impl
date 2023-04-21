@@ -4,8 +4,8 @@ for Real-Time Semantic Segmentation` (https://ieeexplore.ieee.org/document/80634
 
 import torch.nn as nn
 
-from blocks.enet_downsample_block import DownsampleBlock
-from blocks.erfnet_res_block import ResBlock
+from erfnet.blocks.enet_downsample_block import DownsampleBlock
+from erfnet.blocks.erfnet_res_block import ResBlock
 
 
 class Encoder(nn.Module):
@@ -40,13 +40,13 @@ class Decoder(nn.Module):
         super().__init__()
 
         self.block = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=128, out_channels=64, stride=2, kernel_size=3),
+            nn.ConvTranspose2d(in_channels=128, out_channels=64, stride=2, kernel_size=3, padding=1, output_padding=1),
             ResBlock(64),
             ResBlock(64),
-            nn.ConvTranspose2d(in_channels=64, out_channels=16, stride=2, kernel_size=3),
+            nn.ConvTranspose2d(in_channels=64, out_channels=16, stride=2, kernel_size=3, padding=1, output_padding=1),
             ResBlock(16),
             ResBlock(16),
-            nn.ConvTranspose2d(in_channels=16, out_channels=out_channels, stride=2, kernel_size=3)
+            nn.ConvTranspose2d(in_channels=16, out_channels=out_channels, stride=2, kernel_size=3, padding=1, output_padding=1)
         )
     
     def forward(self, x):
