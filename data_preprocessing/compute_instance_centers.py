@@ -72,7 +72,7 @@ def compute_instance_center(ann_path: pathlib.Path, out_folder: pathlib.Path):
     print(f'generating for the image {ann_path}')
     img = np.squeeze(io.imread(ann_path))
 
-    center_img = np.zeros((3,) + img.shape[:2], dtype=np.uint16)
+    center_img = np.zeros((3,) + img.shape[:2], dtype=np.uint16)  #(instance_label at its center, centers_y, centers_x)
 
     reg_props = measure.regionprops(img)
 
@@ -87,7 +87,7 @@ def compute_instance_center(ann_path: pathlib.Path, out_folder: pathlib.Path):
         coords = np.argwhere(region_img).tolist()
         if len(coords) > 100:
             coords = np.array(random.sample(coords, k=int(round(len(coords) * 0.25))))
-        center = compute_medoid(coords) + region_top_left_corner
+        center = compute_medoid(coords) + region_top_left_corner   # (y, x)
         # else:
         #     region_skeleton = morphology.skeletonize(region_img)
         #     # coords = np.argwhere(region_skeleton)
