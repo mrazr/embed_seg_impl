@@ -39,7 +39,14 @@ def train(cfg: DictConfig):
         model.train()
 
         train_epoch_loss = 0.0
+        train_hinge_loss = 0.0
+        train_seed_loss = 0.0
+        train_smooth_loss = 0.0
+
         val_epoch_loss = 0.0
+        val_hinge_loss = 0.0
+        val_seed_loss = 0.0
+        val_smooth_loss = 0.0
 
         for imgs, anns_dict in tqdm(train_dl, desc='Train batch'):
             adam.zero_grad()
@@ -50,14 +57,25 @@ def train(cfg: DictConfig):
 
             seed_maps, offset_maps, sigma_maps = model(imgs)
 
-            loss_val = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
+            # loss_val = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
+            hinge_loss, seed_loss, smooth_loss = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
+            loss_val = hinge_loss + seed_loss + smooth_loss
+
+            # print(f'hinge loss = {hinge_loss.detach().cpu()}\tseed_loss = {seed_loss.detach().cpu()}\tsmooth_loss = {smooth_loss.detach().cpu()}')
 
             loss_val.backward()
             adam.step()
 
             train_epoch_loss += loss_val.detach().cpu()
 
+            train_hinge_loss += hinge_loss.detach().cpu()
+            train_seed_loss += seed_loss.detach().cpu()
+            train_smooth_loss += smooth_loss.detach().cpu()
+
         train_epoch_loss = train_epoch_loss / len(train_dl)
+        train_hinge_loss = train_hinge_loss / len(train_dl)
+        train_seed_loss = train_seed_loss / len(train_dl)
+        train_smooth_loss = train_smooth_loss / len(train_dl)
 
         model.eval()
         with torch.no_grad():
@@ -68,11 +86,20 @@ def train(cfg: DictConfig):
 
                 seed_maps, offset_maps, sigma_maps = model(imgs)
 
-                loss_val = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
+                hinge_loss, seed_loss, smooth_loss = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
+                loss_val = hinge_loss + seed_loss + smooth_loss
+
+                # print(f'hinge loss = {hinge_loss.detach().cpu()}\tseed_loss = {seed_loss.detach().cpu()}\tsmooth_loss = {smooth_loss.detach().cpu()}')
 
                 val_epoch_loss += loss_val.detach().cpu()
+                val_hinge_loss += hinge_loss.detach().cpu()
+                val_seed_loss += seed_loss.detach().cpu()
+                val_smooth_loss += smooth_loss.detach().cpu()
 
         val_epoch_loss = val_epoch_loss / len(val_dl)
+        val_hinge_loss /= len(val_dl)
+        val_seed_loss /= len(val_dl)
+        val_smooth_loss /= len(val_dl)
 
         if val_epoch_loss < best_val_loss:
             best_val_loss = val_epoch_loss
@@ -82,6 +109,14 @@ def train(cfg: DictConfig):
         wandb.log({'train_loss': train_epoch_loss, 'val_loss': val_epoch_loss}, step=epoch)
         wandb.log({'train_loss': train_epoch_loss}, step=epoch)
         wandb.log({'val_loss': val_epoch_loss}, step=epoch)
+
+        wandb.log({'train_hinge_loss': train_hinge_loss}, step=epoch)
+        wandb.log({'train_seed_loss': train_seed_loss}, step=epoch)
+        wandb.log({'train_smooth_loss': train_smooth_loss}, step=epoch)
+
+        wandb.log({'val_hinge_loss': val_hinge_loss}, step=epoch)
+        wandb.log({'val_seed_loss': val_seed_loss}, step=epoch)
+        wandb.log({'val_smooth_loss': val_smooth_loss}, step=epoch)
 
         print(f'Epoch losses: train = {train_epoch_loss}\tvalidation = {val_epoch_loss}')
 

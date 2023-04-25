@@ -40,7 +40,7 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
         sigmas = sigma_map[:, yy, xx]  # should be (n,) shape
         sigma_k = torch.mean(sigmas)
 
-        smooth_loss += torch.square(torch.norm(sigmas - sigma_k)) / sigmas.shape[0]
+        smooth_loss += torch.mean(torch.square(sigmas - sigma_k))
 
         mean_sigma_map[:, yy, xx] = sigma_k
 
@@ -60,21 +60,30 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
         #
         #     hinge_loss += torch.maximum(torch.norm(ei - Ck) - hinge_margin, torch.tensor(0))
 
-    phi_k_ei_map = torch.exp(-torch.square(torch.norm(ei_yx_map - medoids_map)) / (2 * torch.square(mean_sigma_map)))
+    phi_k_ei_map = torch.exp(-torch.square(torch.linalg.norm(ei_yx_map - medoids_map, dim=0)) / (2 * torch.square(mean_sigma_map)))
 
-    hinge_loss = torch.sum(torch.maximum(torch.norm(ei_yx_map - medoids_map) - hinge_margin_map, torch.tensor(0).to(dev)))
+    hinge_loss = torch.sum(torch.maximum(torch.linalg.norm(ei_yx_map - medoids_map, dim=0) - hinge_margin_map, torch.tensor(0).to(dev)))
 
     # sigma_loss = torch.sum(torch.abs(sigma_map - mean_sigma_map))
 
-    seed_loss = torch.mean(torch.square(seed_map - phi_k_ei_map.detach()))
-    return hinge_loss + seed_loss + smooth_loss
+    prob_map = phi_k_ei_map.detach()
+    prob_map = torch.where(instance_map > 0, prob_map, 0.0)
+
+    seed_loss = torch.mean(torch.square(seed_map - prob_map))
+    return hinge_loss, seed_loss, smooth_loss
 
 
 def embed_seg_loss_fn(seed_map_pred: torch.Tensor, offset_yx_map_pred: torch.Tensor, sigma_map_pred: torch.Tensor, batch_medoids_maps: torch.Tensor, batch_instance_maps: torch.Tensor, dev: str):
-    loss = 0.0
+    # loss = 0.0
+    hinge_loss = 0.0
+    seed_loss = 0.0
+    smooth_loss = 0.0
     for i in range(seed_map_pred.shape[0]):
-        loss += loss_function_per_on_sample(seed_map_pred[i], offset_yx_map_pred[i], sigma_map_pred[i], batch_medoids_maps[i], batch_instance_maps[i], dev)
-    return loss
+        losses = loss_function_per_on_sample(seed_map_pred[i], offset_yx_map_pred[i], sigma_map_pred[i], batch_medoids_maps[i], batch_instance_maps[i], dev)
+        hinge_loss += losses[0]
+        seed_loss += losses[1]
+        smooth_loss += losses[2]
+    return hinge_loss, seed_loss, smooth_loss
 
 
 def sigma_loss_fn(sigma_k, sigmas_k):
