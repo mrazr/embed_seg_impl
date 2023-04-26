@@ -1,0 +1,8 @@
+epochs: 100
+batch_size: 4
+optimizer:
+  name: "adam"
+  lr:
+    initial_value: 0.0005
+    decay_rate: 0.9
+sigma_2d: Yes
