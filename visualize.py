@@ -3,7 +3,7 @@ import typing
 import numpy as np
 from skimage import color, draw, util
 
-from post_processing import Cluster, Instance
+from utils.post_processing import Cluster, Instance
 
 
 def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, alpha=0.5) -> typing.Tuple[np.ndarray, np.ndarray]:
@@ -39,7 +39,7 @@ def visualize_clusters(clusters: typing.List[Cluster], image: np.ndarray) -> np.
         center = np.round(cluster.center).astype(np.uint8)
         rr, cc = draw.disk(tuple(center), 5, shape=vis.shape)
         rgb_vis[rr, cc] = [255, 255, 255]
-        rr, cc = draw.circle_perimeter_aa(center[0], center[1], cluster.sigma, shape=vis.shape)
+        rr, cc = draw.circle_perimeter(center[0], center[1], round(cluster.sigma), shape=vis.shape)
         rgb_vis[rr, cc] = [255, 255, 255]
 
     return rgb_vis
