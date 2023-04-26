@@ -1,16 +1,22 @@
+import random
 from pathlib import Path
 
 import hydra
+import numpy as np
+import torch
 import torch.cuda
+from matplotlib import pyplot as plt
 from omegaconf import DictConfig, OmegaConf
 import wandb
-from torch.utils import data
+from torch import utils
 from tqdm import tqdm
+from torchvision.utils import make_grid
 
 import torch.optim as optim
 
 import embed_seg
-from utils import image_dataset, loss_functions
+import visualize
+from utils import image_dataset, loss_functions, post_processing
 
 
 @hydra.main(config_path='experiments', config_name='config.yaml')
@@ -20,10 +26,10 @@ def train(cfg: DictConfig):
 
     ds = image_dataset.ImageDataset(Path(f'F:/CTCDatasets/PhC-C2DH-U373_TRAIN_CROPS_192'))
 
-    train_ds, val_ds = data.random_split(ds, [0.9, 0.1])
+    train_ds, val_ds = torch.utils.data.random_split(ds, [0.9, 0.1])
 
-    train_dl = data.DataLoader(train_ds, cfg.batch_size, shuffle=True)
-    val_dl = data.DataLoader(val_ds, 2 * cfg.batch_size, shuffle=False)
+    train_dl = torch.utils.data.DataLoader(train_ds, cfg.batch_size, shuffle=True)
+    val_dl = torch.utils.data.DataLoader(val_ds, 2 * cfg.batch_size, shuffle=False)
 
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -95,6 +101,56 @@ def train(cfg: DictConfig):
                 val_hinge_loss += hinge_loss.detach().cpu()
                 val_seed_loss += seed_loss.detach().cpu()
                 val_smooth_loss += smooth_loss.detach().cpu()
+            if epoch % 5 == 0:
+                imgs, _ = random.choice(val_ds)
+                imgs = torch.unsqueeze(imgs, dim=0)
+
+                imgs = imgs.to(dev)
+
+                seed_maps, offset_maps, sigma_maps = model(imgs)
+
+                seed_map = np.squeeze(seed_maps[0].cpu().numpy())
+                offset_map = np.squeeze(offset_maps[0].cpu().numpy())
+                sigma_map = np.squeeze(sigma_maps[0].cpu().numpy())
+
+                img = np.squeeze(imgs[0].cpu().numpy())
+
+                offset_vis_rgb, offset_vis_overlay = visualize.visualize_pixel_offsets(offset_map, img, alpha=0.6)
+                offset_vis_overlay = np.squeeze(offset_vis_overlay)
+                instances = post_processing.get_instances(seed_map, offset_map, sigma_map)
+
+                cluster_vis = visualize.visualize_clusters([instance.cluster for instance in instances], img)
+                instance_vis = visualize.visualize_instances(instances, img)
+
+                fig, axs = plt.subplots(1, 6, figsize=(20, 8))
+                axs[0].imshow(img)
+                axs[1].imshow(seed_map)
+                axs[2].imshow(sigma_map)
+                axs[3].imshow(offset_vis_overlay)
+                axs[4].imshow(cluster_vis)
+                axs[5].imshow(instance_vis)
+
+                fig.tight_layout(pad=0)
+                fig.canvas.draw()
+
+                data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+                data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+
+                grid_wdb = wandb.Image(data)
+                img_wdb = wandb.Image(img)
+                seed_wdb = wandb.Image(np.squeeze(seed_map))
+                sigma_wdb = wandb.Image(np.squeeze(sigma_map))
+                offset_vis_wdb = wandb.Image(offset_vis_overlay)
+                cluster_vis_wdb = wandb.Image(cluster_vis)
+                instance_vis_wdb = wandb.Image(instance_vis)
+
+                wandb.log({'visualization': grid_wdb,
+                           'img': img_wdb,
+                           'seed': seed_wdb,
+                           'sigma': sigma_wdb,
+                           'offset visualization': offset_vis_wdb,
+                           'clusters visualization': cluster_vis_wdb,
+                           'instances': instance_vis_wdb}, step=epoch)
 
         val_epoch_loss = val_epoch_loss / len(val_dl)
         val_hinge_loss /= len(val_dl)

@@ -20,6 +20,8 @@ class Instance:
 
 
 def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np.ndarray) -> typing.List[Instance]:
+    if np.count_nonzero(seed_map > 0.5) == 0:
+        return []
     seeds_y, seeds_x = np.nonzero(seed_map > 0.5)
     seed_values = seed_map[seeds_y, seeds_x]
     seed_coords = np.stack((seeds_y, seeds_x), axis=1)
@@ -49,7 +51,6 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
         seed_sigma = seed_sigmas_desc[0]
         distances = np.linalg.norm(seed_coords_desc - seed_coord, axis=1)
         member_indexes = np.nonzero(distances < seed_sigma)[0]
-        print(member_indexes)
 
         member_coords = seed_coords_desc[member_indexes]
 
