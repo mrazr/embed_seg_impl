@@ -55,7 +55,7 @@ def train(cfg: DictConfig):
         val_seed_loss = 0.0
         val_smooth_loss = 0.0
 
-        for imgs, anns_dict in tqdm(train_dl, desc='Train batch'):
+        for imgs, anns_dict in tqdm(train_dl, desc='Train batch', position=0, leave=True):
             adam.zero_grad()
 
             imgs = imgs.to(dev)
@@ -86,7 +86,7 @@ def train(cfg: DictConfig):
 
         model.eval()
         with torch.no_grad():
-            for imgs, anns_dict in tqdm(val_dl, desc='Val batch'):
+            for imgs, anns_dict in tqdm(val_dl, desc='Val batch', position=0, leave=True):
                 imgs = imgs.to(dev)
                 segs = anns_dict['SEG'].to(dev)
                 centers = anns_dict['INSTANCE_CENTERS'].to(dev)
