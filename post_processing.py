@@ -74,7 +74,7 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
         indices = set(range(seed_coords_desc.shape[0]))
         member_indexes = set(member_indexes.tolist())
 
-        new_indices = list(indices.difference(member_indexes))
+        new_indices = list(sorted(list(indices.difference(member_indexes))))
 
         seed_coords_desc = seed_coords_desc[new_indices]
         seed_sigmas_desc = seed_sigmas_desc[new_indices]
