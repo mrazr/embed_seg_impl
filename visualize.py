@@ -3,7 +3,7 @@ import typing
 import numpy as np
 from skimage import color, draw, util
 
-from utils.post_processing import Cluster, Instance
+from post_processing import Cluster, Instance
 
 
 def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, alpha=0.5) -> typing.Tuple[np.ndarray, np.ndarray]:

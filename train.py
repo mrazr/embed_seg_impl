@@ -10,13 +10,14 @@ from omegaconf import DictConfig, OmegaConf
 import wandb
 from torch import utils
 from tqdm import tqdm
-from torchvision.utils import make_grid
 
 import torch.optim as optim
 
 import embed_seg
 import visualize
-from utils import image_dataset, loss_functions, post_processing
+from data_processing.utils import image_dataset
+import loss_functions
+import post_processing
 
 
 @hydra.main(config_path='experiments', config_name='config.yaml')
@@ -122,13 +123,24 @@ def train(cfg: DictConfig):
                 cluster_vis = visualize.visualize_clusters([instance.cluster for instance in instances], img)
                 instance_vis = visualize.visualize_instances(instances, img)
 
-                fig, axs = plt.subplots(1, 6, figsize=(20, 8))
+                fig, axs = plt.subplots(1, 6, figsize=(30, 12))
                 axs[0].imshow(img)
+                axs[0].set_title('image')
+
                 axs[1].imshow(seed_map)
+                axs[1].set_title('seediness')
+
                 axs[2].imshow(sigma_map)
+                axs[2].set_title('sigmas')
+
                 axs[3].imshow(offset_vis_overlay)
+                axs[3].set_title('offset vis')
+
                 axs[4].imshow(cluster_vis)
+                axs[4].set_title('cluster')
+
                 axs[5].imshow(instance_vis)
+                axs[5].set_title('instances')
 
                 fig.tight_layout(pad=0)
                 fig.canvas.draw()

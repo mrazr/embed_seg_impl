@@ -25,11 +25,13 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
     ei_yx_map = grid + offset_yx_map  # (2, 192, 192)
 
     mean_sigma_map = torch.zeros_like(sigma_map).to(dev)  # (1, 192, 192)
-    hinge_margin_map = torch.zeros_like(sigma_map).to(dev)  # (1, 192, 192)
+    # hinge_margin_map = torch.zeros_like(sigma_map).to(dev)  # (1, 192, 192)
 
     # phi_k_ei_map = torch.linalg.norm(ei_yx_map - medoids_map)
 
     smooth_loss = torch.tensor(0.0).to(dev)
+
+    hinge_loss = 0.0
 
     for k in instance_ids:
         if k == 0:
@@ -48,7 +50,11 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
 
         hinge_margin = torch.sqrt(-LN05 * 2 * (sigma_k*sigma_k))
 
-        hinge_margin_map[:, yy, xx] = hinge_margin
+        ei_s = ei_yx_map[:, yy, xx]
+        centers = medoids_map[:, yy, xx]
+        hinge_loss += torch.sum(torch.maximum(torch.linalg.norm(ei_s - centers, dim=0) - hinge_margin, torch.tensor(0.0).to(dev)))
+
+        # hinge_margin_map[:, yy, xx] = hinge_margin
         # for y, x in zip(yy, xx):
         #     Ck = medoids_map[:, y, x]  # (2, )
         #     ei = torch.asarray([y + offset_yx_map[0, y, x], x + offset_yx_map[1, y, x]]).to(dev)
@@ -62,7 +68,7 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
 
     phi_k_ei_map = torch.exp(-torch.square(torch.linalg.norm(ei_yx_map - medoids_map, dim=0)) / (2 * torch.square(mean_sigma_map)))
 
-    hinge_loss = torch.sum(torch.maximum(torch.linalg.norm(ei_yx_map - medoids_map, dim=0) - hinge_margin_map, torch.tensor(0).to(dev)))
+    # hinge_loss = torch.sum(torch.maximum(torch.linalg.norm(ei_yx_map - medoids_map, dim=0) - hinge_margin_map, torch.tensor(0).to(dev)))
 
     # sigma_loss = torch.sum(torch.abs(sigma_map - mean_sigma_map))
 

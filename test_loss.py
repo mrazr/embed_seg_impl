@@ -1,7 +1,6 @@
 import torch
 
-from utils import loss_functions
-
+import loss_functions
 
 if __name__ == '__main__':
     medoids_true = torch.randint(20, 100, (2, 25, 25))
