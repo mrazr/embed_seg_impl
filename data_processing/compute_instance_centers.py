@@ -14,8 +14,7 @@ from scipy import ndimage as ndi
 from skimage import io, measure
 from tqdm import tqdm
 
-
-import research_utils.utils.ctc_folder as ctc_folder
+from utils import ctc_folder
 
 
 def compute_medoid(coords_subset: np.ndarray, all_coords: np.ndarray) -> np.ndarray:

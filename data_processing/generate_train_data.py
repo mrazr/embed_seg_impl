@@ -11,7 +11,7 @@ from multiprocessing import Pool
 import numpy as np
 from skimage import io
 
-import research_utils.utils.ctc_folder as ctc_folder
+import utils.ctc_folder as ctc_folder
 
 from compute_instance_centers import compute_instance_centers
 
