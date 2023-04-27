@@ -56,7 +56,7 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
         hinge_loss += torch.sum(torch.maximum(torch.linalg.norm(ei_s - centers, dim=0) - hinge_margin, torch.tensor(0.0).to(dev)))
 
         phi_s = torch.exp(-torch.square(torch.linalg.norm(ei_s - centers, dim=0)) / (2 * sigma_k * sigma_k))
-        lov_loss += torch.mean(1.0 * torch.log(phi_s))
+        lov_loss += -1.0 * torch.mean(1.0 * torch.log(phi_s))
 
         # hinge_margin_map[:, yy, xx] = hinge_margin
         # for y, x in zip(yy, xx):
