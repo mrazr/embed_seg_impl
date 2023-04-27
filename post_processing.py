@@ -65,7 +65,7 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
 
         member_coords = np.multiply(seed_coords_normed_desc[member_indexes], np.array([list(seed_map.shape)]))
 
-        cluster = Cluster(next_instance_id, (seed_coord[0], seed_coord[1]), member_coords, seed_sigma)
+        cluster = Cluster(next_instance_id, (seed_coord[0], seed_coord[1]), member_coords, sigma_map.shape[0] * seed_sigma)
 
         instance = Instance(next_instance_id, seed_coords_desc_orig[member_indexes], cluster)
         instances.append(instance)

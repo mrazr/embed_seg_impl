@@ -20,4 +20,4 @@ class EmbedSegModel(nn.Module):
 
         offset_map = instance_branch[:, :2, :, :]
 
-        return F.sigmoid(self.seed_branch(z)), F.tanh(offset_map), torch.exp(instance_branch[:, 2:, :, :])
+        return F.sigmoid(self.seed_branch(z)), F.tanh(offset_map), F.sigmoid(instance_branch[:, 2:, :, :])

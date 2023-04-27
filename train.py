@@ -102,7 +102,7 @@ def train(cfg: DictConfig):
                 val_hinge_loss += hinge_loss.detach().cpu()
                 val_seed_loss += seed_loss.detach().cpu()
                 val_smooth_loss += smooth_loss.detach().cpu()
-            if epoch % 5 == 0:
+            if epoch % 3 == 0:
                 imgs, _ = random.choice(val_ds)
                 imgs = torch.unsqueeze(imgs, dim=0)
 
