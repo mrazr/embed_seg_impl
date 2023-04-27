@@ -60,10 +60,11 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
         # phi_s = torch.exp(-torch.square(torch.linalg.norm(ei_s - centers, dim=0)) / (2 * sigma_k * sigma_k))
         # lov_loss += -1.0 * torch.mean(1.0 * torch.log(phi_s))
 
-        instance_map_ = torch.where(instance_map[0] == k, 1.0, 0.0)
-        log_phi_k = torch.where(instance_map[0] == k, torch.log(phi_k_map), torch.log(1.0 - phi_k_map))
+        # instance_map_ = torch.where(instance_map[0] == k, 1.0, 0.0)
 
-        lov_loss += -1.0 * torch.mean(torch.multiply(instance_map_, log_phi_k))
+        log_phi_k = torch.where(instance_map[0] == k, torch.log(phi_k_map + 1e-12), torch.log(1.0 - phi_k_map + 1e-12))
+
+        lov_loss += -1.0 * torch.mean(log_phi_k)
 
         # lov_loss += -1.0 * torch.mean(1.0 * torch.)
 
