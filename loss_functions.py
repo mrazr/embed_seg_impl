@@ -32,6 +32,7 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
     smooth_loss = torch.tensor(0.0).to(dev)
 
     hinge_loss = 0.0
+    lov_loss = 0.0
 
     for k in instance_ids:
         if k == 0:
@@ -53,6 +54,9 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
         ei_s = ei_yx_map[:, yy, xx]
         centers = medoids_map[:, yy, xx]
         hinge_loss += torch.sum(torch.maximum(torch.linalg.norm(ei_s - centers, dim=0) - hinge_margin, torch.tensor(0.0).to(dev)))
+
+        phi_s = torch.exp(-torch.square(torch.linalg.norm(ei_s - centers, dim=0)) / (2 * sigma_k * sigma_k))
+        lov_loss += torch.mean(1.0 * torch.log(phi_s))
 
         # hinge_margin_map[:, yy, xx] = hinge_margin
         # for y, x in zip(yy, xx):
@@ -76,7 +80,7 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
     prob_map = torch.where(instance_map > 0, prob_map, 0.0)
 
     seed_loss = torch.mean(torch.square(seed_map - prob_map))
-    return hinge_loss, seed_loss, smooth_loss
+    return hinge_loss + lov_loss, seed_loss, smooth_loss
 
 
 def embed_seg_loss_fn(seed_map_pred: torch.Tensor, offset_yx_map_pred: torch.Tensor, sigma_map_pred: torch.Tensor, batch_medoids_maps: torch.Tensor, batch_instance_maps: torch.Tensor, dev: str):
