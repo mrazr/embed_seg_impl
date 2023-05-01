@@ -22,6 +22,7 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
     :return:
     """
 
+    instance_map = torch.squeeze(instance_map)
     instance_ids = torch.unique(instance_map)
 
     mesh_yy, mesh_xx = torch.meshgrid(torch.linspace(0.0, 1.0, seed_map.shape[0]),
@@ -34,11 +35,17 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
     l_instance = 0.0
     l_seed = 0.0
 
+    # print(f'centers shape is {centers_map.shape}')
+
     for k in instance_ids:
         if k == 0:
             continue
-        instance_center = torch.unsqueeze(torch.unsqueeze(torch.argwhere(centers_map[0] == k)[0], dim=-1), dim=-1)
+        # instance_center = torch.unsqueeze(torch.unsqueeze(torch.argwhere(centers_map[0] == k)[0], dim=-1), dim=-1)
         instance_yy, instance_xx = torch.nonzero(instance_map == k, as_tuple=True)
+
+        instance_center = torch.unsqueeze(torch.unsqueeze(centers_map[:, instance_yy[0], instance_xx[0]], dim=-1), dim=-1)
+
+        # print(f'instance center shape = {instance_center.shape}')
 
         instance_sigmas = sigma_map[0, instance_yy, instance_xx]
 
@@ -51,11 +58,11 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
         B_k = torch.where(instance_map == k, 1.0, 0.0)
         l_instance += lovasz_hinge(2.0 * D_k - 1.0, 2.0 * B_k - 1.0)
 
-        l_seed += torch.mean(torch.square(D_k[instance_yy, instance_xx] - seed_map[instance_yy, instance_xx]))
+        l_seed += torch.mean(torch.square(D_k[instance_yy, instance_xx] - seed_map[0, instance_yy, instance_xx]))
 
     bg_yy, bg_xx = torch.nonzero(instance_map == 0, as_tuple=True)
 
-    l_seed += torch.mean(torch.square(seed_map[bg_yy, bg_xx]))
+    l_seed += torch.mean(torch.square(seed_map[0, bg_yy, bg_xx]))
     l_var /= (instance_ids.shape[0] - 1)
 
     return l_instance, l_seed, l_var
