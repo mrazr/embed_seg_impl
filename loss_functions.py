@@ -26,7 +26,7 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
 
     mesh_yy, mesh_xx = torch.meshgrid(torch.linspace(0.0, 1.0, seed_map.shape[0]),
                                       torch.linspace(0.0, 1.0, seed_map.shape[1]), indexing='ij')
-    pixel_grid = torch.permute(torch.dstack((mesh_yy, mesh_xx)), dims=(1, 2, 0))
+    pixel_grid = torch.permute(torch.dstack((mesh_yy, mesh_xx)), dims=(2, 0, 1))
 
     shifted_pixel_grid = pixel_grid + offset_yx_map
 
