@@ -54,6 +54,7 @@ def loss_function_per_on_sample(seed_map: torch.Tensor, offset_yx_map: torch.Ten
         ei_s = ei_yx_map[:, yy, xx]
         centers = medoids_map[:, yy, xx]
         center = torch.unsqueeze(torch.unsqueeze(centers[:, 0], dim=-1), dim=-1)
+
         hinge_loss += torch.sum(torch.maximum(torch.linalg.norm(ei_s - centers, dim=0) - hinge_margin, torch.tensor(0.0).to(dev)))
 
         phi_k_map = torch.exp(-torch.square(torch.linalg.norm(ei_yx_map - center, dim=0)) / (2 * sigma_k * sigma_k))
