@@ -1,5 +1,6 @@
 import random
 from pathlib import Path
+import sys
 
 import hydra
 import numpy as np
@@ -25,7 +26,7 @@ def train(cfg: DictConfig):
     wandb.login()
     wandb.init(project='pa228_embed_seg_test', config=OmegaConf.to_container(cfg, resolve=True))
 
-    ds = image_dataset.ImageDataset(Path(f'F:/CTCDatasets/PhC-C2DH-U373_TRAIN_CROPS_192'))
+    ds = image_dataset.ImageDataset(Path(sys.argv[1]))
 
     train_ds, val_ds = torch.utils.data.random_split(ds, [0.9, 0.1])
 
@@ -123,6 +124,8 @@ def train(cfg: DictConfig):
                 cluster_vis = visualize.visualize_clusters([instance.cluster for instance in instances], img)
                 instance_vis = visualize.visualize_instances(instances, img)
 
+                offset_map_vis = visualize.visualize_offset_vectors(img, seed_map, np.moveaxis(offset_map, 0, -1))
+
                 fig, axs = plt.subplots(1, 6, figsize=(30, 12))
                 axs[0].imshow(img)
                 axs[0].set_title('image')
@@ -133,7 +136,7 @@ def train(cfg: DictConfig):
                 axs[2].imshow(sigma_map)
                 axs[2].set_title('sigmas')
 
-                axs[3].imshow(offset_vis_overlay)
+                axs[3].imshow(offset_map_vis)
                 axs[3].set_title('offset vis')
 
                 axs[4].imshow(cluster_vis)
