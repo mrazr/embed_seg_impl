@@ -58,7 +58,7 @@ def visualize_instances(instances: typing.List[Instance], image: np.ndarray) -> 
     return rgb
 
 
-def visualize_offset_vectors(image: np.ndarray, seediness: np.ndarray, offset_yx_map: np.ndarray) -> np.ndarray:
+def visualize_offset_vectors(image: np.ndarray, seediness: np.ndarray, offset_yx_map: np.ndarray, ax):
     yy, xx = np.meshgrid(np.arange(image.shape[0]), np.arange(image.shape[1]), indexing='ij')
     # yy, xx = yy[::4, ::4], xx[::4, ::4]
     step = 20
@@ -72,16 +72,15 @@ def visualize_offset_vectors(image: np.ndarray, seediness: np.ndarray, offset_yx
 
     offs_angles = (np.rad2deg(np.arctan2(offset_yx_map[:, :, 0], offset_yx_map[:, :, 1])) + 180).astype(np.uint32)
 
-    fig, ax = plt.subplots(1, 1, figsize=(30, 20))
+    # fig, ax = plt.subplots(1, 1, figsize=(30, 20))
     ax.imshow(image, cmap='gray')
     ax.quiver(arr_xxs[::step], arr_yys[::step], offsets_x[::step], offsets_y[::step], offs_angles[yys, xxs][::step],
                width=0.0005, angles='xy', headwidth=6, cmap='jet')
 
+    # fig.canvas.draw()
 
-    fig.canvas.draw()
-
-    data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-
-    return data
+    # data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+    # data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    #
+    # return data
 
