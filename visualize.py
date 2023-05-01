@@ -7,7 +7,7 @@ from skimage import color, draw, util
 from post_processing import Cluster, Instance
 
 
-def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, alpha=0.5) -> typing.Tuple[np.ndarray, np.ndarray]:
+def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, seediness: np.ndarray, alpha=0.5) -> typing.Tuple[np.ndarray, np.ndarray]:
     angles = np.rad2deg(np.arctan2(offset_yx_map[0], offset_yx_map[1])) + 180
     norms = np.linalg.norm(offset_yx_map, axis=0)
     norms = norms / np.max(norms)
@@ -19,6 +19,8 @@ def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, alpha=
     overlaid = util.img_as_float32(np.dstack((image,) * 3))
 
     overlaid = alpha * rgb + (1.0 - alpha) * overlaid
+
+    overlaid = np.where(np.dstack((seediness > 0.5, ) * 3), overlaid, rgb)
 
     return rgb, overlaid
 
