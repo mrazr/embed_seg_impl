@@ -117,7 +117,7 @@ def train(cfg: DictConfig):
 
                 img = np.squeeze(imgs[0].cpu().numpy())
 
-                offset_vis_rgb, offset_vis_overlay = visualize.visualize_pixel_offsets(offset_map, img, alpha=0.6)
+                offset_vis_rgb, offset_vis_overlay = visualize.visualize_pixel_offsets(offset_map, img, seed_map, alpha=0.6)
                 offset_vis_overlay = np.squeeze(offset_vis_overlay)
                 instances = post_processing.get_instances(seed_map, offset_map, sigma_map)
 
