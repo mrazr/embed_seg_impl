@@ -12,7 +12,7 @@ def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, alpha=
     norms = np.linalg.norm(offset_yx_map, axis=0)
     norms = norms / np.max(norms)
 
-    hsv = np.dstack((angles / 360.0, norms, np.ones_like(norms)))
+    hsv = np.dstack((angles / 360.0, np.ones_like(norms), np.ones_like(norms)))
 
     rgb = color.hsv2rgb(hsv)
 
@@ -62,7 +62,7 @@ def visualize_offset_vectors(image: np.ndarray, seediness: np.ndarray, offset_yx
     yy, xx = np.meshgrid(np.arange(image.shape[0]), np.arange(image.shape[1]), indexing='ij')
     # yy, xx = yy[::4, ::4], xx[::4, ::4]
     step = 20
-    yys, xxs = np.nonzero(seediness > 0)
+    yys, xxs = np.nonzero(seediness > 0.5)
 
     arr_xxs = xx[yys, xxs]
     arr_yys = yy[yys, xxs]
@@ -75,7 +75,7 @@ def visualize_offset_vectors(image: np.ndarray, seediness: np.ndarray, offset_yx
     # fig, ax = plt.subplots(1, 1, figsize=(30, 20))
     ax.imshow(image, cmap='gray')
     ax.quiver(arr_xxs[::step], arr_yys[::step], offsets_x[::step], offsets_y[::step], offs_angles[yys, xxs][::step],
-               width=0.0005, angles='xy', headwidth=6, cmap='jet')
+               width=0.0005, angles='xy', headwidth=6, cmap='jet', scale=10)
 
     # fig.canvas.draw()
 

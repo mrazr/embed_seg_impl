@@ -124,7 +124,6 @@ def train(cfg: DictConfig):
                 cluster_vis = visualize.visualize_clusters([instance.cluster for instance in instances], img)
                 instance_vis = visualize.visualize_instances(instances, img)
 
-
                 fig, axs = plt.subplots(1, 6, figsize=(30, 12))
                 axs[0].imshow(img)
                 axs[0].set_title('image')
@@ -135,8 +134,8 @@ def train(cfg: DictConfig):
                 axs[2].imshow(sigma_map)
                 axs[2].set_title('sigmas')
 
-                visualize.visualize_offset_vectors(img, seed_map, np.moveaxis(offset_map, 0, -1), axs[3])
-                # axs[3].imshow(offset_map_vis)
+                # visualize.visualize_offset_vectors(img, seed_map, np.moveaxis(offset_map, 0, -1), axs[3])
+                axs[3].imshow(offset_vis_overlay)
                 axs[3].set_title('offset vis')
 
                 axs[4].imshow(cluster_vis)
