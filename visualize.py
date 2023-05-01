@@ -10,9 +10,10 @@ from post_processing import Cluster, Instance
 def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, seediness: np.ndarray, alpha=0.5) -> typing.Tuple[np.ndarray, np.ndarray]:
     angles = np.rad2deg(np.arctan2(offset_yx_map[0], offset_yx_map[1])) + 180
     norms = np.linalg.norm(offset_yx_map, axis=0)
+    norms = np.where(seediness > 0.5, norms, 0.0)
     norms = norms / np.max(norms)
 
-    hsv = np.dstack((angles / 360.0, np.ones_like(norms), np.ones_like(norms)))
+    hsv = np.dstack((angles / 360.0, norms, np.ones_like(norms)))
 
     rgb = color.hsv2rgb(hsv)
 
