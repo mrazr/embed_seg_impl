@@ -1,5 +1,6 @@
 import typing
 
+import matplotlib.pyplot as plt
 import numpy as np
 from skimage import color, draw, util
 
@@ -37,7 +38,7 @@ def visualize_clusters(clusters: typing.List[Cluster], image: np.ndarray) -> np.
 
     for cluster in clusters:
         center = np.round(cluster.center).astype(np.uint8)
-        rr, cc = draw.disk(tuple(center[::-1]), 5, shape=vis.shape)
+        rr, cc = draw.disk(tuple(center), 5, shape=vis.shape)
         rgb_vis[rr, cc] = [255, 255, 255]
         rr, cc = draw.circle_perimeter(center[0], center[1], round(cluster.sigma), shape=vis.shape)
         rgb_vis[rr, cc] = [255, 255, 255]
@@ -55,3 +56,32 @@ def visualize_instances(instances: typing.List[Instance], image: np.ndarray) -> 
     rgb = np.round(255 * color.label2rgb(vis, image)).astype(np.uint8)
 
     return rgb
+
+
+def visualize_offset_vectors(image: np.ndarray, seediness: np.ndarray, offset_yx_map: np.ndarray) -> np.ndarray:
+    yy, xx = np.meshgrid(np.arange(image.shape[0]), np.arange(image.shape[1]), indexing='ij')
+    # yy, xx = yy[::4, ::4], xx[::4, ::4]
+    step = 20
+    yys, xxs = np.nonzero(seediness > 0)
+
+    arr_xxs = xx[yys, xxs]
+    arr_yys = yy[yys, xxs]
+
+    offsets_y = offset_yx_map[yys, xxs, 0]
+    offsets_x = offset_yx_map[yys, xxs, 1]
+
+    offs_angles = (np.rad2deg(np.arctan2(offset_yx_map[:, :, 0], offset_yx_map[:, :, 1])) + 180).astype(np.uint32)
+
+    fig, ax = plt.subplots(1, 1, figsize=(30, 20))
+    ax.imshow(image, cmap='gray')
+    ax.quiver(arr_xxs[::step], arr_yys[::step], offsets_x[::step], offsets_y[::step], offs_angles[yys, xxs][::step],
+               width=0.0005, angles='xy', headwidth=6, cmap='jet')
+
+
+    fig.canvas.draw()
+
+    data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+
+    return data
+

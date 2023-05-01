@@ -25,7 +25,7 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
     seeds_y, seeds_x = np.nonzero(seed_map > 0.5)
 
     seed_coords_y, seed_coords_x = np.meshgrid(np.linspace(0, 1.0, seed_map.shape[0]),
-                                               np.linspace(0, 1.0, seed_map.shape[1]))
+                                               np.linspace(0, 1.0, seed_map.shape[1]), indexing='ij')
 
     seed_coords_normed = np.dstack((seed_coords_y, seed_coords_x))
     seed_coords_normed = seed_coords_normed + np.moveaxis(offset_yx_map, 0, -1)  # now we shifted the pixels
@@ -63,7 +63,8 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
         probs = np.exp(-1.0 * np.square(np.linalg.norm(seed_coords_normed_desc - seed_coord_normed, axis=1)) / (2 * (seed_sigma * seed_sigma)))
         member_indexes = np.nonzero(probs > 0.5)[0]
 
-        member_coords = np.multiply(seed_coords_normed_desc[member_indexes], np.array([list(seed_map.shape)]))
+        # member_coords = np.multiply(seed_coords_normed_desc[member_indexes], np.array([list(seed_map.shape)]))
+        member_coords = seed_coords_normed_desc[member_indexes]
 
         cluster = Cluster(next_instance_id, (seed_coord[0], seed_coord[1]), member_coords, sigma_map.shape[0] * seed_sigma)
 
