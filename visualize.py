@@ -16,11 +16,11 @@ def visualize_pixel_offsets(offset_yx_map: np.ndarray, image: np.ndarray, seedin
 
     rgb = color.hsv2rgb(hsv)
 
-    overlaid = util.img_as_float32(np.dstack((image,) * 3))
+    rgb_im = util.img_as_float32(np.dstack((image,) * 3))
 
-    overlaid = alpha * rgb + (1.0 - alpha) * overlaid
+    overlaid = alpha * rgb + (1.0 - alpha) * rgb_im
 
-    overlaid = np.where(np.dstack((seediness > 0.5, ) * 3), overlaid, rgb)
+    overlaid = np.where(np.dstack((seediness > 0.5, ) * 3), overlaid, rgb_im)
 
     return rgb, overlaid
 
