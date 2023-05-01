@@ -26,7 +26,7 @@ def train(cfg: DictConfig):
     wandb.login()
     wandb.init(project='pa228_embed_seg_test', config=OmegaConf.to_container(cfg, resolve=True))
 
-    ds = image_dataset.ImageDataset(Path(sys.argv[1]))
+    ds = image_dataset.ImageDataset(Path(cfg.dataset_path))
 
     train_ds, val_ds = torch.utils.data.random_split(ds, [0.9, 0.1])
 
