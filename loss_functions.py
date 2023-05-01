@@ -27,7 +27,7 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
 
     mesh_yy, mesh_xx = torch.meshgrid(torch.linspace(0.0, 1.0, seed_map.shape[0]),
                                       torch.linspace(0.0, 1.0, seed_map.shape[1]), indexing='ij')
-    pixel_grid = torch.permute(torch.dstack((mesh_yy, mesh_xx)), dims=(2, 0, 1))
+    pixel_grid = torch.permute(torch.dstack((mesh_yy, mesh_xx)), dims=(2, 0, 1)).to(dev)
 
     shifted_pixel_grid = pixel_grid + offset_yx_map
 
@@ -53,10 +53,10 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
 
         l_var += torch.mean(torch.square(instance_sigmas - mean_instance_sigma))
 
-        D_k = torch.exp(-1.0 * (torch.square(torch.linalg.norm(shifted_pixel_grid - instance_center, dim=0))) / (2 * mean_instance_sigma * mean_instance_sigma))
+        D_k = torch.exp(-1.0 * (torch.square(torch.linalg.norm(shifted_pixel_grid - instance_center, dim=0))) / (2 * mean_instance_sigma * mean_instance_sigma + 1e-12))
 
         B_k = torch.where(instance_map == k, 1.0, 0.0)
-        l_instance += lovasz_hinge(2.0 * D_k - 1.0, 2.0 * B_k - 1.0)
+        l_instance += lovasz_hinge(2.0 * torch.unsqueeze(D_k, dim=0) - 1.0, torch.unsqueeze(B_k, dim=0))
 
         l_seed += torch.mean(torch.square(D_k[instance_yy, instance_xx] - seed_map[0, instance_yy, instance_xx]))
 
