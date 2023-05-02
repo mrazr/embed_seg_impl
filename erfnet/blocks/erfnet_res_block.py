@@ -14,13 +14,13 @@ class ResBlock(nn.Module):
         self.conv1_v = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 1), padding='same')
         self.prelu1_v = nn.PReLU()
         self.conv1_h = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 3), padding='same')
-        self.bn1 = nn.BatchNorm2d(in_channels)
+        self.bn1 = nn.BatchNorm2d(in_channels, eps=1e-3)
         self.prelu1_h = nn.PReLU()
 
         self.conv2_v = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 1), padding='same', dilation=dilation)
         self.prelu2_v = nn.PReLU()
         self.conv2_h = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 3), padding='same', dilation=dilation)
-        self.bn2 = nn.BatchNorm2d(in_channels)
+        self.bn2 = nn.BatchNorm2d(in_channels, eps=1e-3)
 
         self.dropout = nn.Dropout(p=0.3)
 

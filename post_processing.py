@@ -38,7 +38,7 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
     # seed_offsets[0] *= seed_map.shape[0]
     # seed_offsets[1] *= seed_map.shape[1]
 
-    seed_sigmas = sigma_map[seeds_y, seeds_x]
+    seed_sigmas = np.moveaxis(sigma_map[:, seeds_y, seeds_x], 0, -1)  # (n, 2)
 
     idx_sort = np.argsort(seed_values)[::-1]
 
@@ -60,7 +60,11 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
         seed_sigma = seed_sigmas_desc[0]
         seed_coord_normed = seed_coords_normed_desc[0]
 
-        probs = np.exp(-1.0 * np.square(np.linalg.norm(seed_coords_normed_desc - seed_coord_normed, axis=1)) / (2 * (seed_sigma * seed_sigma)))
+        scaled_sigma = np.exp(-10 * seed_sigma)
+
+        # probs = np.exp(-1.0 * np.square(np.linalg.norm(seed_coords_normed_desc - seed_coord_normed, axis=1)) / (2 * (seed_sigma * seed_sigma)))
+        probs = np.exp(-1.0 * np.square(np.linalg.norm(seed_coords_normed_desc[:, 0] - seed_coord_normed[0], axis=0)) / scaled_sigma[0] -
+                       np.square(np.linalg.norm(seed_coords_normed_desc[:, 1] - seed_coord_normed[1], axis=0)) / scaled_sigma[1])
         member_indexes = np.nonzero(probs > 0.5)[0]
 
         # member_coords = np.multiply(seed_coords_normed_desc[member_indexes], np.array([list(seed_map.shape)]))

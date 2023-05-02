@@ -6,7 +6,7 @@ from erfnet.erfnet import Encoder, Decoder
 
 
 class EmbedSegModel(nn.Module):
-    def __init__(self, sigma_2d: bool=False):
+    def __init__(self, sigma_2d: bool=True):
         super().__init__()
         self.encoder = Encoder()
 
