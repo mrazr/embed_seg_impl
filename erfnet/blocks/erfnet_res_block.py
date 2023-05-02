@@ -16,7 +16,8 @@ class ResBlock(nn.Module):
 
         self.conv2_v = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 1), padding='same', dilation=dilation)
         self.conv2_h = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 3), padding='same', dilation=dilation)
-    
+        self.dropout = nn.Dropout(p=0.3)
+
     def forward(self, x):
         in_x = x
 
@@ -26,4 +27,4 @@ class ResBlock(nn.Module):
         x = F.relu(self.conv2_v(x))
         x = self.conv2_h(x)
 
-        return F.relu(torch.add(x, in_x))
+        return self.dropout(F.relu(torch.add(x, in_x)))
