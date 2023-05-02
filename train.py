@@ -23,9 +23,6 @@ import post_processing
 
 @hydra.main(config_path='experiments', config_name='config.yaml')
 def train(cfg: DictConfig):
-    wandb.login()
-    wandb.init(project='pa228_embed_seg_test', config=OmegaConf.to_container(cfg, resolve=True))
-
     ds = image_dataset.ImageDataset(Path(cfg.dataset_path))
 
     train_ds, val_ds = torch.utils.data.random_split(ds, [0.9, 0.1])
@@ -42,6 +39,9 @@ def train(cfg: DictConfig):
 
     loss_fn = loss_functions.embed_seg_loss_fn
     best_val_loss = 99999999
+
+    wandb.login()
+    wandb.init(project='pa228_embed_seg_test', config=OmegaConf.to_container(cfg, resolve=True))
 
     for epoch in tqdm(range(epochs), desc='Epoch'):
         model.train()
