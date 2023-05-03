@@ -77,7 +77,7 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
         B_k = torch.where(instance_map == k, 1.0, 0.0)
         l_instance += lovasz_hinge(2.0 * torch.unsqueeze(D_k, dim=0) - 1.0, torch.unsqueeze(B_k, dim=0))
 
-        l_seed += torch.mean(torch.square(D_k[instance_yy, instance_xx] - seed_map[0, instance_yy, instance_xx]))
+        l_seed += torch.mean(torch.square(D_k[instance_yy, instance_xx].detach() - seed_map[0, instance_yy, instance_xx]))
 
     bg_yy, bg_xx = torch.nonzero(instance_map == 0, as_tuple=True)
 
