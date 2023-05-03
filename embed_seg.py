@@ -18,6 +18,12 @@ class EmbedSegModel(nn.Module):
 
         instance_branch = self.instance_branch(z)
 
-        offset_map = instance_branch[:, :2, :, :]
+        offsets_y_map = F.tanh(instance_branch[:, 2:3, :, :])
+        offsets_x_map = F.tanh(instance_branch[:, 3:, :, :])
+        
+        # print(f'offsets y map shape = {offsets_y_map.shape}')
+        
+        offset_map = torch.cat((offsets_y_map, offsets_x_map), dim=1)
+        # print(f'offset map shape {offset_map.shape}')
 
-        return F.sigmoid(self.seed_branch(z)), F.tanh(offset_map), F.sigmoid(instance_branch[:, 2:, :, :])
+        return F.sigmoid(self.seed_branch(z)), offset_map, F.sigmoid(instance_branch[:, :2, :, :])

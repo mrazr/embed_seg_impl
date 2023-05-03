@@ -28,7 +28,9 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
     mesh_yy, mesh_xx = torch.meshgrid(torch.linspace(0.0, 1.0, seed_map.shape[0]),
                                       torch.linspace(0.0, 1.0, seed_map.shape[1]), indexing='ij')
     pixel_grid = torch.permute(torch.dstack((mesh_yy, mesh_xx)), dims=(2, 0, 1)).to(dev)
-
+    
+    # print(f'offset y mean = {torch.mean(offset_yx_map[0])}\toffset x mean = {torch.mean(offset_yx_map[1])}')
+    
     shifted_pixel_grid = pixel_grid + offset_yx_map
 
     l_var = 0.0
@@ -43,8 +45,12 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
         # instance_center = torch.unsqueeze(torch.unsqueeze(torch.argwhere(centers_map[0] == k)[0], dim=-1), dim=-1)
         instance_yy, instance_xx = torch.nonzero(instance_map == k, as_tuple=True)
 
-        instance_center = torch.unsqueeze(torch.unsqueeze(centers_map[:, instance_yy[0], instance_xx[0]], dim=-1), dim=-1)  # (2, 1, 1)
-
+        # instance_center = torch.unsqueeze(torch.unsqueeze(centers_map[:, instance_yy[0], instance_xx[0]], dim=-1), dim=-1)  # (2, 1, 1)
+        instance_center = torch.unsqueeze(torch.unsqueeze(torch.argwhere(centers_map == k)[0], dim=-1), dim=-1).to(torch.float32)
+        instance_center[0] /= centers_map.shape[0]
+        instance_center[1] /= centers_map.shape[1]
+        
+        # print(f'instance center is {instance_center.cpu()}')
         # print(f'instance center shape = {instance_center.shape}')
 
         instance_sigmas = sigma_map[:, instance_yy, instance_xx] # (2, n)
@@ -53,9 +59,20 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
         scaled_mean_instance_sigma = torch.exp(-10 * mean_instance_sigma) # (2, 1)
 
         l_var += torch.mean(torch.square(torch.linalg.norm(instance_sigmas - mean_instance_sigma, dim=0)))
+        # print(f'instance sigmas shape = {instance_sigmas.shape}')
+        # print(f'mean instance sigma shape = {mean_instance_sigma.shape}')
+        # print(f'shape of shift px gr [0, :, :] = {shifted_pixel_grid[0, :, :].shape}')
+        # print(f'shape of shift px gr [0] = {shifted_pixel_grid[0].shape}')
+        # print(f'shape of the big - {torch.square(shifted_pixel_grid[0, :, :] - instance_center[0, :, :]).shape}')
 
         # D_k = torch.exp(-1.0 * (torch.square(torch.linalg.norm(shifted_pixel_grid - instance_center, dim=0))) / (2 * mean_instance_sigma * mean_instance_sigma + 1e-12))
-        D_k = torch.exp(-1.0 * torch.square(torch.linalg.norm(shifted_pixel_grid[0, :, :] - instance_center[0, :, :], dim=0)) / scaled_mean_instance_sigma[0, 0] - torch.square(torch.linalg.norm(shifted_pixel_grid[1, :, :] - instance_center[1, :, :], dim=0)) / scaled_mean_instance_sigma[1, 0])
+        D_k = torch.exp(-1.0 * torch.square(shifted_pixel_grid[0, :, :] - instance_center[0, :, :]) / scaled_mean_instance_sigma[0, 0] - 
+                        torch.square(shifted_pixel_grid[1, :,:] - instance_center[1, :, :]) / scaled_mean_instance_sigma[1, 0])
+        # D_k = torch.exp(-1.0 * torch.square(shifted_pixel_grid[0, :, :] - instance_center[0, :, :]) / scaled_mean_instance_sigma[0, 0] - 
+        #                 torch.square(shifted_pixel_grid[1, :,:] - instance_center[1, :, :]) / scaled_mean_instance_sigma[1, 0])
+        # D_k = torch.exp(-1.0 * torch.square(shifted_pixel_grid[0, :,:] - instance_center[0, :, :]) / scaled_mean_instance_sigma[0, 0])
+        
+        # print(f'd_k shape = {D_k.shape}')
 
         B_k = torch.where(instance_map == k, 1.0, 0.0)
         l_instance += lovasz_hinge(2.0 * torch.unsqueeze(D_k, dim=0) - 1.0, torch.unsqueeze(B_k, dim=0))

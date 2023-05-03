@@ -43,7 +43,7 @@ def visualize_clusters(clusters: typing.List[Cluster], image: np.ndarray) -> np.
         center = np.round(cluster.center).astype(np.uint8)
         rr, cc = draw.disk(tuple(center), 5, shape=vis.shape)
         rgb_vis[rr, cc] = [255, 255, 255]
-        rr, cc = draw.circle_perimeter(center[0], center[1], round(cluster.sigma), shape=vis.shape)
+        rr, cc = draw.circle_perimeter(center[0], center[1], round(cluster.sigma[0]), shape=vis.shape)
         rgb_vis[rr, cc] = [255, 255, 255]
 
     return rgb_vis

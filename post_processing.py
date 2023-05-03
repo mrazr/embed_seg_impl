@@ -63,14 +63,19 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
         scaled_sigma = np.exp(-10 * seed_sigma)
 
         # probs = np.exp(-1.0 * np.square(np.linalg.norm(seed_coords_normed_desc - seed_coord_normed, axis=1)) / (2 * (seed_sigma * seed_sigma)))
-        probs = np.exp(-1.0 * np.square(np.linalg.norm(seed_coords_normed_desc[:, 0] - seed_coord_normed[0], axis=0)) / scaled_sigma[0] -
-                       np.square(np.linalg.norm(seed_coords_normed_desc[:, 1] - seed_coord_normed[1], axis=0)) / scaled_sigma[1])
+        probs = np.exp(-1.0 * np.square(seed_coords_normed_desc[:, 0] - seed_coord_normed[0]) / scaled_sigma[0] -
+                       np.square(seed_coords_normed_desc[:, 1] - seed_coord_normed[1]) / scaled_sigma[1])
         member_indexes = np.nonzero(probs > 0.5)[0]
 
         # member_coords = np.multiply(seed_coords_normed_desc[member_indexes], np.array([list(seed_map.shape)]))
         member_coords = seed_coords_normed_desc[member_indexes]
+        member_coords[:, 0] *= seed_map.shape[0]
+        member_coords[:, 1] *= seed_map.shape[1]
+        member_coords = np.round(member_coords).astype(np.uint32)
 
-        cluster = Cluster(next_instance_id, (seed_coord[0], seed_coord[1]), member_coords, sigma_map.shape[0] * seed_sigma)
+        cluster = Cluster(next_instance_id, (round(seed_coord_normed[0] * seed_map.shape[0]), 
+                                             round(seed_coord_normed[1] * seed_map.shape[1])), 
+                          member_coords, sigma_map.shape[0] * seed_sigma)
 
         instance = Instance(next_instance_id, seed_coords_desc_orig[member_indexes], cluster)
         instances.append(instance)
