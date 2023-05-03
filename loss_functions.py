@@ -58,7 +58,7 @@ def new_loss(seed_map: torch.Tensor, offset_yx_map: torch.Tensor, sigma_map: tor
         mean_instance_sigma = torch.mean(instance_sigmas, dim=-1, keepdim=True) # (2, 1)
         scaled_mean_instance_sigma = torch.exp(-10 * mean_instance_sigma) # (2, 1)
 
-        l_var += torch.mean(torch.square(torch.linalg.norm(instance_sigmas - mean_instance_sigma, dim=0)))
+        l_var += torch.mean(torch.pow(instance_sigmas - mean_instance_sigma, 2))
         # print(f'instance sigmas shape = {instance_sigmas.shape}')
         # print(f'mean instance sigma shape = {mean_instance_sigma.shape}')
         # print(f'shape of shift px gr [0, :, :] = {shifted_pixel_grid[0, :, :].shape}')
