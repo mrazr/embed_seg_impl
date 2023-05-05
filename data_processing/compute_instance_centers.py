@@ -95,7 +95,6 @@ def generate_instance_centers_for_sample(sample: ctc_folder.Sample):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Compute instance centers', description='Computes instance centers either by extracting skeleton centers or by computing region medoids.')
     parser.add_argument('folder')
-    parser.add_argument('--medoids', action='store_true', default=False, help='compute medoids of instance regions (will take long)')
 
     args = parser.parse_args()
 

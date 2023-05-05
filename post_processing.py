@@ -6,6 +6,15 @@ import numpy as np
 
 @dataclasses.dataclass
 class Cluster:
+    """
+    A class representing clustered pixels.
+
+    Attributes:
+        id: int - the id of the instance that this cluster represents
+        center: tuple(int, int) - the center of this cluster
+        pixels: np.ndarray - the pixels that belong to this cluster (in embedding space)
+        sigma: float - the clustering bandwidth
+    """
     id: int
     center: typing.Tuple[int, int]
     pixels: np.ndarray
@@ -14,12 +23,28 @@ class Cluster:
 
 @dataclasses.dataclass
 class Instance:
+    """
+    A class representing an instance.
+
+    Attributes:
+        id: int - the id of the instance (will be always greater than 1)
+        pixels: np.ndarray (n, 2) - the pixels belonging to this instance
+        cluster: Cluster
+    """
     id: int
     pixels: np.ndarray
     cluster: Cluster
 
 
 def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np.ndarray) -> typing.List[Instance]:
+    """
+    Computes instances from the predictions for one image.
+
+    :param seed_map: np.ndarray (H, W) the seediness map
+    :param offset_yx_map: np.ndarray (2, H, W) the Y,X offsets map
+    :param sigma_map: np.ndarray (2, H, W) the Y, X sigmas map
+    :return: list(Instance) list of `Instance` objects
+    """
     if np.count_nonzero(seed_map > 0.5) == 0:
         return []
     seeds_y, seeds_x = np.nonzero(seed_map > 0.5)
