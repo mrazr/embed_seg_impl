@@ -51,7 +51,6 @@ class Decoder(nn.Module):
             ResBlock(16),
             ResBlock(16),
             nn.ConvTranspose2d(in_channels=16, out_channels=out_channels, stride=2, kernel_size=3, padding=1, output_padding=1),
-            # nn.BatchNorm2d(out_channels),
         )
     
     def forward(self, x):
