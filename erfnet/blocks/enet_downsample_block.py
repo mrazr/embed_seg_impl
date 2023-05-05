@@ -1,4 +1,4 @@
-# This file contains the downsampling block as introduced in the paper `ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation` (https://arxiv.org/abs/1606.02147)
+# This file contains the initial downsampling block as introduced in the paper `ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation` (https://arxiv.org/abs/1606.02147)
 
 import torch
 from torch import nn
