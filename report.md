@@ -3,7 +3,7 @@
 This is a report detailing the implementation of my semestral project for the **PA228** course.
 It is divided into logical sections as follows:
 1. Project introduction - in this section I introduce the method I chose to implement.
-2. Implementation - the main part of this report, it is further divided into subsections: *Data preparation*, *Model definition*, *Loss function*, *Training*, *Miscellaneous*
+2. Implementation - the main part of this report, it is further divided into subsections: *Data preparation*, *Model definition*, *Loss function*, *Training*, *Miscellaneous*, *Results*
 3. Closing thoughts - in this section I lay down a few comments about the project
 
 ## Project introduction
@@ -162,3 +162,17 @@ incorrect annotations for the instance center, but it does not seem so.
 This part only details some more things that are implemented in the project.
 - `embed_seg_impl/post_processing.py` contains the code to cluster the embedded pixels into instances.
 - `embed_seg_impl/visualize.py` contains a few visualization functions
+- `embed_seg_impl/predict.py` script that takes as first argument a path to the model state dictionary and as second argument a path to ctc dataset and then generates predictions along with visualizations.
+Stores the segmentations and visualizations in *0x_instance_maps* and *0x_visualizations*.
+
+### Results
+As I did not manage to properly train the network to perform the instance segmentation this section is really short and features
+only one picture a visualization of the prediction applied on a single full size image from the *DIC-C2DH-HeLa* dataset.
+![Prediction visualization](report_files/vis_01_t045.png)
+
+## Closing thoughts
+Even though I did not manage to successfully finish the project, I feel like I still obtained valuable knowledge.
+Especially:
+- the usage of configuration files for storing hyperparameters and other settings regarding the training (hydra, omegaconf)
+- logging of the training process (losses) and other media files (images) on the Weights & Biases
+- I also researched a bit the gpu cloud services and tried the gpu cloud from lambdalabs.com
