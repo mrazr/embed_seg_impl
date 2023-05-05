@@ -17,6 +17,7 @@ import loss_functions
 import post_processing
 import visualize
 from data_processing.utils import image_dataset
+from data_processing.utils.image_dataset import TrainDataset
 
 
 @hydra.main(config_path='experiments', config_name='config.yaml')
@@ -24,6 +25,7 @@ def train(cfg: DictConfig):
     ds = image_dataset.ImageDataset(Path(cfg.dataset_path))
 
     train_ds, val_ds = torch.utils.data.random_split(ds, [0.9, 0.1])
+    train_ds = TrainDataset(train_ds)
 
     train_dl = torch.utils.data.DataLoader(train_ds, cfg.batch_size, shuffle=True)
     val_dl = torch.utils.data.DataLoader(val_ds, 2 * cfg.batch_size, shuffle=False)

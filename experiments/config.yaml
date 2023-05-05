@@ -1,4 +1,4 @@
-dataset_path: 'PhC-C2DH-U373/TRAIN_CROPS_256x256'
+dataset_path: 'DIC-C2DH-HeLa/TRAIN_CROPS_256x256'
 epochs: 200
 batch_size: 4
 optimizer:
