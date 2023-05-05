@@ -1,24 +1,22 @@
 import random
 from pathlib import Path
-import sys
 
 import hydra
 import numpy as np
 import torch
 import torch.cuda
+import torch.optim as optim
+import wandb
 from matplotlib import pyplot as plt
 from omegaconf import DictConfig, OmegaConf
-import wandb
 from torch import utils
 from tqdm import tqdm
 
-import torch.optim as optim
-
 import embed_seg
-import visualize
-from data_processing.utils import image_dataset
 import loss_functions
 import post_processing
+import visualize
+from data_processing.utils import image_dataset
 
 
 @hydra.main(config_path='experiments', config_name='config.yaml')
@@ -65,11 +63,8 @@ def train(cfg: DictConfig):
 
             seed_maps, offset_maps, sigma_maps = model(imgs)
 
-            # loss_val = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
             hinge_loss, seed_loss, smooth_loss = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
             loss_val = hinge_loss + seed_loss + smooth_loss
-
-            # print(f'hinge loss = {hinge_loss.detach().cpu()}\tseed_loss = {seed_loss.detach().cpu()}\tsmooth_loss = {smooth_loss.detach().cpu()}')
 
             loss_val.backward()
             adam.step()
@@ -97,13 +92,11 @@ def train(cfg: DictConfig):
                 hinge_loss, seed_loss, smooth_loss = loss_fn(seed_maps, offset_maps, sigma_maps, centers, segs, dev)
                 loss_val = hinge_loss + seed_loss + smooth_loss
 
-                # print(f'hinge loss = {hinge_loss.detach().cpu()}\tseed_loss = {seed_loss.detach().cpu()}\tsmooth_loss = {smooth_loss.detach().cpu()}')
-
                 val_epoch_loss += loss_val.detach().cpu()
                 val_hinge_loss += hinge_loss.detach().cpu()
                 val_seed_loss += seed_loss.detach().cpu()
                 val_smooth_loss += smooth_loss.detach().cpu()
-            if (epoch + 1) % 2 == 0:
+            if (epoch + 1) % cfg.visualization_frequency == 0:
                 imgs, _ = random.choice(val_ds)
                 imgs = torch.unsqueeze(imgs, dim=0)
 
@@ -137,7 +130,6 @@ def train(cfg: DictConfig):
                 axs[3].imshow(sigma_map[1, :, :])
                 axs[3].set_title('sigmas x')
 
-                # visualize.visualize_offset_vectors(img, seed_map, np.moveaxis(offset_map, 0, -1), axs[3])
                 axs[4].imshow(offset_vis_overlay)
                 axs[4].set_title('offset vis')
 
@@ -174,6 +166,8 @@ def train(cfg: DictConfig):
                            'sigmas y': sigmay_wdb,
                            'sigmas x': sigmax_wdb,
                            'offset visualization': offset_vis_wdb,
+                           'offsets y': offset_map[0, :, :],
+                           'offsets x': offset_map[1, :, :],
                            'clusters visualization': cluster_vis_wdb,
                            'instances': instance_vis_wdb}, step=epoch)
 
