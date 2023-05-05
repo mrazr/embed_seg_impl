@@ -11,7 +11,9 @@ from torch.utils import data
 class ImageDataset(data.Dataset):
     def __init__(self, folder: Path):
         super().__init__()
-        self.dataset_folder: Path = Path(folder)
+        self.dataset_folder: Path = Path(folder).absolute()
+        if not self.dataset_folder.exists():
+            raise FileNotFoundError(f'The folder {folder} does not exist.')
 
         self.samples: typing.List[typing.Tuple[Path, typing.Dict[str, Path]]] = []
 
