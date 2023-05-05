@@ -28,7 +28,6 @@ class ImageDataset(data.Dataset):
                 img_name = img_path.name[1:]  # txyz.tif -> xyz.tif
                 ann_paths = {}
                 for annotation_folder in annotation_folders[folder]:
-                    # _, annotation_name = annotation_folder.name.split('_')[-1]
                     annotation_name = annotation_folder.name.replace(folder.name + '_', '')
                     ann_name = 'man_seg' + img_name # man_segxyz.tif
                     ann_paths[annotation_name] = annotation_folder / ann_name
@@ -46,14 +45,6 @@ class ImageDataset(data.Dataset):
 
         centers_img = io.imread(ann_paths['INSTANCE_CENTERS'])[:, :, 0].astype(np.int32)
         
-
-        # channel 0 is y-s of instance centers, channel 1 is x-s of instance centers
-
-        # centers_img[:, :, 0] = centers_img[:, :, 0] / centers_img.shape[0]
-        # centers_img[:, :, 1] = centers_img[:, :, 1] / centers_img.shape[1]
-
-        # centers_img = np.moveaxis(centers_img, -1, 0)
-
         return torch.tensor(img), {'SEG': torch.tensor(seg_img),
                                    'INSTANCE_CENTERS': torch.tensor(centers_img)}
 
