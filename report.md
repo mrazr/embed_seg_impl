@@ -1,5 +1,7 @@
 # PA228 Semestral project - Cell instance segmentation
 
+Github repo: https://github.com/mrazr/embed_seg_impl
+
 This is a report detailing the implementation of my semestral project for the **PA228** course.
 It is divided into logical sections as follows:
 1. Project introduction - in this section I introduce the method I chose to implement.
