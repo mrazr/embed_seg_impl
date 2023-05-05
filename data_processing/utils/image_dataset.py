@@ -11,7 +11,9 @@ from torch.utils import data
 class ImageDataset(data.Dataset):
     def __init__(self, folder: Path):
         super().__init__()
-        self.dataset_folder: Path = Path.cwd() / Path(folder)
+        self.dataset_folder: Path = Path(folder)
+        if not self.dataset_folder.is_absolute():
+            raise ValueError("Please provide an absolute path for the dataset")
         if not self.dataset_folder.exists():
             raise FileNotFoundError(f'The folder {self.dataset_folder} does not exist.')
 
