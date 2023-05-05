@@ -1,18 +1,13 @@
 import argparse
 import pathlib
-import shutil
-import sys
-from pathlib import Path
 import random
-import typing
+import shutil
 from multiprocessing import Pool
+from pathlib import Path
 
-import cv2
 import numpy as np
 import numpy.typing as npt
-from scipy import ndimage as ndi
 from skimage import io, measure
-from tqdm import tqdm
 
 from utils import ctc_folder
 
@@ -86,15 +81,6 @@ def generate_instance_centers(ctc_folder_path: Path):
 
         with Pool() as p:
             p.map(generate_instance_centers_for_sample, sequence.samples)
-        # for sample in sequence.samples:
-        #     if sample.gold_annotations['SEG'] is not None:
-        #         ann = io.imread(sample.gold_annotations['SEG'])
-        #         inst_centers = compute_instance_centers(ann)
-        #         io.imsave(gt_out / sample.image_path.name, inst_centers)
-        #     if sample.silver_annotations['SEG'] is not None:
-        #         ann = io.imread(sample.silver_annotations['SEG'])
-        #         inst_centers = compute_instance_centers(ann)
-        #         io.imsave(st_out / sample.image_path.name, inst_centers)
 
 
 def generate_instance_centers_for_sample(sample: ctc_folder.Sample):
@@ -116,29 +102,3 @@ if __name__ == '__main__':
     folder = Path(args.folder)
 
     generate_instance_centers(folder)
-
-    # must_compute_medoid = args.medoids
-    #
-    # if '_' not in folder.name:
-    #     # TODO - provide a more helpful error message (the folder we're looking for has to be in the format `xy_{GT, ST}`, where `x` and `y` are digits)
-    #     print('Folder name must contain _')
-    #     sys.exit(1)
-    #
-    # sequence_number, truth_type = folder.name.split('_')
-    #
-    # if not folder.exists():
-    #     print('Folder does not exist')
-    #     sys.exit(1)
-    #
-    # out_folder = Path(folder) / 'INSTANCE_CENTERS'
-    #
-    # out_folder.mkdir(exist_ok=True)
-    #
-    # seg_folder = folder / 'SEG'
-    #
-    # ann_paths = list(seg_folder.glob('*.tif'))
-    #
-    # mp_args = [(ann_path, out_folder) for ann_path in ann_paths]
-    #
-    # with Pool() as p:
-    #     p.starmap(compute_instance_center, mp_args)
