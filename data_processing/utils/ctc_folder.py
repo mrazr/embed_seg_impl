@@ -90,10 +90,8 @@ class Sequence:
     def __len__(self) -> int:
         return len(self.image_paths)
     
-    # def __getitem__(self, idx: int) -> typing.Tuple[Path, typing.Dict[str, Path]]:
     def __getitem__(self, idx: int) -> Sample:
         img_name = self.image_paths[idx].name
-        # return self.image_paths[idx], {'GT': self.gold_annotations[img_name], 'ST': self.silver_annotations[img_name]}
         return Sample(self.image_paths[idx],
                       gold_annotations=self.gold_annotations[img_name],
                       silver_annotations=self.silver_annotations[img_name],
