@@ -36,14 +36,14 @@ class Instance:
     cluster: Cluster
 
 
-def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np.ndarray) -> typing.List[Instance]:
+def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np.ndarray) -> typing.Tuple[typing.List[Instance], np.ndarray]:
     """
     Computes instances from the predictions for one image.
 
     :param seed_map: np.ndarray (H, W) the seediness map
     :param offset_yx_map: np.ndarray (2, H, W) the Y,X offsets map
     :param sigma_map: np.ndarray (2, H, W) the Y, X sigmas map
-    :return: list(Instance) list of `Instance` objects
+    :return: list(Instance) list of `Instance` objects and np.ndarray instance labels map
     """
     if np.count_nonzero(seed_map > 0.5) == 0:
         return []
@@ -105,4 +105,9 @@ def get_instances(seed_map: np.ndarray, offset_yx_map: np.ndarray, sigma_map: np
         seed_coords_desc_orig = seed_coords_desc_orig[new_indices]
         seed_coords_normed_desc = seed_coords_normed_desc[new_indices]
 
-    return instances
+    instance_map = np.zeros_like(seed_map, dtype=np.uint16)
+
+    for instance in instances:
+        instance_map[instance.pixels[:, 0], instance.pixels[:, 1]] = instance.id
+
+    return instances, instance_map
