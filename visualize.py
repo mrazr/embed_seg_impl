@@ -75,15 +75,7 @@ def visualize_offset_vectors(image: np.ndarray, seediness: np.ndarray, offset_yx
 
     offs_angles = (np.rad2deg(np.arctan2(offset_yx_map[:, :, 0], offset_yx_map[:, :, 1])) + 180).astype(np.uint32)
 
-    # fig, ax = plt.subplots(1, 1, figsize=(30, 20))
     ax.imshow(image, cmap='gray')
     ax.quiver(arr_xxs[::step], arr_yys[::step], offsets_x[::step], offsets_y[::step], offs_angles[yys, xxs][::step],
                width=0.0005, angles='xy', headwidth=6, cmap='jet', scale=10)
-
-    # fig.canvas.draw()
-
-    # data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    # data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    #
-    # return data
 
